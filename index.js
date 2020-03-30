@@ -27,22 +27,22 @@ client.on('message', async message => {
 	if (message.content.startsWith(`${prefix}play`)) {
 		execute(message, serverQueue);
 		return;
-	} else if (message.content.startsWith(`${prefix}skip`)) {
+	} else if (message.content.startsWith(`${prefix}skip `)) {
 		skip(message, serverQueue);
 		return;
-	} else if (message.content.startsWith(`${prefix}stop`)) {
+	} else if (message.content.startsWith(`${prefix}stop `)) {
 		stop(message, serverQueue);
 		return;
-	} else if (message.content.startsWith(`${prefix}join`)) {
+	} else if (message.content.startsWith(`${prefix}join `)) {
 		join(message);
 		return;
-	} else if (message.content.startsWith(`${prefix}disconnect`)) {
+	} else if (message.content.startsWith(`${prefix}disconnect `)) {
 		disconnect(message.guild);
 		return;
-	} else if (message.content.startsWith(`${prefix}pause`)) {
+	} else if (message.content.startsWith(`${prefix}pause `)) {
 		pause(message, serverQueue);
 		return;
-	} else if (message.content.startsWith(`${prefix}resume`)) {
+	} else if (message.content.startsWith(`${prefix}resume `)) {
 		resume(message, serverQueue);
 		return;
 	} else {
