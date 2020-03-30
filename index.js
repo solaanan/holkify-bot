@@ -160,7 +160,7 @@ function play(guild, song) {
 	  return;
 	}
 
-	const dispatcher = serverQueue.connection.play(ytdl(song.url, {quality: 'highest'})).on("finish", () => {
+	const dispatcher = serverQueue.connection.play(ytdl(song.url, {quality: 'highest', liveBuffer: 100000})).on("finish", () => {
 		serverQueue.songs.shift();
 		play(guild, serverQueue.songs[0]);
 	}).on("error", error => console.error(error));
