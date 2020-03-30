@@ -78,7 +78,7 @@ async function execute(message, serverQueue) {
 		);
 
 	try {
-		ytdl.getURLVideoID(url)
+		ytdl.getURLVideoID(args[1])
 	} catch (err) {
 		console.log(err)
 	}
