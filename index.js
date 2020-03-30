@@ -45,6 +45,9 @@ client.on('message', async message => {
 	} else if (message.content.startsWith(`${prefix}resume`)) {
 		resume(message, serverQueue);
 		return;
+	} else if (message.content.startsWith(`${prefix}skipto`)) {
+		skipto(message, serverQueue);
+		return;
 	} else {
 		message.channel.send("\:no_entry: You need to enter a valid command!");
 	}
@@ -157,7 +160,25 @@ function play(guild, song) {
 	  return;
 	}
 
-	const dispatcher = serverQueue.connection.play(ytdl(song.url)).on("finish", () => {
+	const dispatcher = serverQueue.connection.play(ytdl(song.url, {quality: 'highest'})).on("finish", () => {
+		serverQueue.songs.shift();
+		play(guild, serverQueue.songs[0]);
+	}).on("error", error => console.error(error));
+	dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+	serverQueue.textChannel.send(`\:arrow_forward: Start playing: **${song.title}**`);
+}
+
+function skipto(message, serverQueue) {
+	const args = message.content.split(' ');
+	const guild = message.guild;
+	const serverQueue = queue.get(guild.id);
+	if (!song) {
+	  serverQueue.voiceChannel.leave();
+	  queue.delete(guild.id);
+	  return;
+	}
+
+	const dispatcher = serverQueue.connection.play(ytdl(song.url, {quality: 'highest', begin: args[2]})).on("finish", () => {
 		serverQueue.songs.shift();
 		play(guild, serverQueue.songs[0]);
 	}).on("error", error => console.error(error));
