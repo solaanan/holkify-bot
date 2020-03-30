@@ -19,11 +19,10 @@ client.once('disconnect', () => {
 client.on('message', async message => {
 	if (message.author.bot) return;
 	if (!message.content.startsWith(prefix)) return;
+	if (message.channel.id != "693551208387838012") return ;
 
 	const serverQueue = queue.get(message.guild.id);
 
-	const Role = message.member.roles.cache.find(r => r.name === "Admin")
-	if (!Role) { message.channel.send("You need to be an admin for that."); return; }
 
 	if (message.content.startsWith(`${prefix}play`)) {
 		execute(message, serverQueue);
