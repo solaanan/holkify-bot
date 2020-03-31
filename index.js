@@ -142,10 +142,9 @@ function join(message) {
 	}
 }
 
-function disconnect(guild) {
-	const serverQueue = queue.get(guild.id);
-	serverQueue.voiceChannel.leave();
-	queue.delete(guild.id);
+function disconnect(message) {
+	message.member.voice.channel.leave();
+	queue.delete(message.guild.id);
 }
 
 
