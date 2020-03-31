@@ -54,11 +54,11 @@ client.on('message', async message => {
 	} else if (message.content.startsWith(`${prefix}lyrics`)) {
 		lyrics(message, serverQueue);
 		return;
-	} else if (message.content.startsWith(`${prefix}spit`)) {
-		spit(message);
-		return;
 	} else if (message.content.startsWith(`${prefix}spit-hardly`)) {
 		spit_hardly(message);
+		return;
+	} else if (message.content.startsWith(`${prefix}spit`)) {
+		spit(message);
 		return;
 	} else {
 		message.channel.send("\:no_entry: You need to enter a valid command!");
