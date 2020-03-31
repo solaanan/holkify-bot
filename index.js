@@ -57,6 +57,9 @@ client.on('message', async message => {
 	} else if (message.content.startsWith(`${prefix}spit`)) {
 		spit(message);
 		return;
+	} else if (message.content.startsWith(`${prefix}spit-hardly`)) {
+		spit_hardly(message);
+		return;
 	} else {
 		message.channel.send("\:no_entry: You need to enter a valid command!");
 	}
@@ -170,6 +173,11 @@ function disconnect(message) {
 
 function spit(message) {
 	const glitch = message.guild.emojis.cache.get("694322315185487963");
+	return message.channel.send(`${glitch}`);
+}
+
+function spit_hardly(message) {
+	const glitch = message.guild.emojis.cache.get("694543544932892713");
 	return message.channel.send(`${glitch}`);
 }
 
