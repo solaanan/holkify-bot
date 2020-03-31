@@ -1,8 +1,11 @@
 const Discord = require('discord.js');
 const prefix = "*";
 const token = process.env.token;
-const ytdl = require('ytdl-core');
+const geniusToken = process.env.geniusToken;
 
+const ytdl = require('ytdl-core');
+const genius = require("genius-lyrics");
+const Genius = new genius.Client(geniusToken);
 
 const client = new Discord.Client();
 
@@ -37,13 +40,22 @@ client.on('message', async message => {
 		join(message);
 		return;
 	} else if (message.content.startsWith(`${prefix}disconnect`)) {
-		disconnect(message.guild);
+		disconnect(message);
 		return;
 	} else if (message.content.startsWith(`${prefix}pause`)) {
 		pause(message, serverQueue);
 		return;
 	} else if (message.content.startsWith(`${prefix}resume`)) {
 		resume(message, serverQueue);
+		return;
+	} else if (message.content.startsWith(`${prefix}status`)) {
+		status(message, serverQueue);
+		return;
+	} else if (message.content.startsWith(`${prefix}lyrics`)) {
+		lyrics(message, serverQueue);
+		return;
+	} else if (message.content.startsWith(`${prefix}spit`)) {
+		spit(message);
 		return;
 	} else {
 		message.channel.send("\:no_entry: You need to enter a valid command!");
@@ -90,7 +102,6 @@ async function execute(message, serverQueue) {
 	};
 
 	if (!serverQueue) {
-
 	} else {
 		serverQueue.songs.push(song);
 		return message.channel.send(`${song.title} has been added to the queue!`);
@@ -137,14 +148,29 @@ function join(message) {
 	}
 	try {
 		voiceChannel.join();
+		return message.channel.send(
+			"I joined your voice channel !"
+		);
 	} catch (err) {
 		console.log(err)
 	}
 }
 
 function disconnect(message) {
-	message.member.voice.channel.leave();
+	try {
+		message.member.voice.channel.leave();
+	} catch (err) {
+		console.log(err)
+	}
 	queue.delete(message.guild.id);
+	return message.channel.send(
+		"I left your voice channel !"
+	);
+}
+
+function spit(message) {
+	const glitch = message.guild.emojis.cache.get("694322315185487963");
+	return message.channel.send(`${glitch}`);
 }
 
 
@@ -175,6 +201,51 @@ function skip(message, serverQueue) {
 	return message.channel.send("\:fast_forward: Skipping to next song..");
 }
 
+function status(message, serverQueue) {
+	if (serverQueue) {
+		message.channel.send(`\:arrow_forward: Now playing: **${serverQueue.songs[0].title}**`);
+		if (serverQueue.songs[1])
+		message.channel.send(`Next: **${serverQueue.songs[1].title}**`);
+		if (serverQueue.songs[2])
+		message.channel.send(`Later: **${serverQueue.songs[2].title}**`);
+	} else {
+		message.channel.send(`\:no_entry: No song is playing !`);
+	}
+}
+
+function sendLyrics(channel, lyrics) {
+	let i = 0;
+	let len = lyrics.length
+
+	if (len <= 1990)
+		return channel.send("\:musical_note: Lyrics:\n\n"+lyrics);
+	else {
+		channel.send("\:musical_note: Lyrics:\n\n");
+		while (i <= len) {
+			channel.send(lyrics.substr(i, 1990));
+			i += 1990;
+		}
+	}
+	return ;
+}
+
+async function lyrics(message, serverQueue) {
+	if (serverQueue){
+
+		const title = encodeURI(serverQueue.songs[0].title);
+		const search = await Genius.findTrack(title);
+		if (search.response.hits.length === 0) {
+			return spit(message);
+		}
+		const url = await Genius.getUrl(search);
+		const lyricsJSON = await Genius.getLyrics(url);
+		const lyrics = lyricsJSON.lyrics;
+		return sendLyrics(message.channel, lyrics);
+	} else {
+		return message.channel.send("\:no_entry: No song is playing ..");
+	}
+}
+
 function stop(message, serverQueue) {
 	if (!message.member.voice.channel)
 		return message.channel.send(
@@ -191,6 +262,7 @@ function pause(message, serverQueue) {
 			"\:cry: You have to be in a voice channel to stop the music!"
 	);
 	serverQueue.connection.dispatcher.pause();
+	serverQueue.playing = false;
 	return message.channel.send(" \:pause_button: Paused!");
 }
 

@@ -8,6 +8,7 @@
     "discord.js": "^12.1.1",
     "ffmpeg": "0.0.4",
     "fluent-ffmpeg": "^2.1.2",
+    "genius-lyrics": "^1.0.9",
     "ytdl-core": "^2.0.1"
   },
   "devDependencies": {},
