@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
 const prefix = "*";
-const { token, geniusToken, ytAPIToken } = require("./tokens.json");
-// const token = process.env.token;
-// const geniusToken = process.env.geniusToken;
-// const ytAPIToken =  process.env.ytAPIToken;
+// const { token, geniusToken, ytAPIToken } = require("./tokens.json");
+const token = process.env.token;
+const geniusToken = process.env.geniusToken;
+const ytAPIToken =  process.env.ytAPIToken;
 
 const ytdl = require('ytdl-core');
 const genius = require("genius-lyrics");
