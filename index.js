@@ -1,15 +1,15 @@
 const Discord = require('discord.js');
 const prefix = "*";
-// const { token, geniusToken, ytAPIToken } = require("./tokens.json");
-const token = process.env.token;
-const geniusToken = process.env.geniusToken;
-const ytAPIToken =  process.env.ytAPIToken;
+const { token, geniusToken, ytAPIToken } = require("./tokens.json");
+// const token = process.env.token;
+// const geniusToken = process.env.geniusToken;
+// const ytAPIToken =  process.env.ytAPIToken;
 
 const ytdl = require('ytdl-core');
 const genius = require("genius-lyrics");
 const Genius = new genius.Client(geniusToken);
 const ytSearch = require('youtube-search');
-const ping = require('ping');
+const tcpp = require('tcp-ping');
 
 const opts = {
 	maxResults: 1,
@@ -75,7 +75,7 @@ client.on('message', async message => {
 		help(message);
 		return;
 	} else if (message.content.startsWith(`${prefix}ping`)) {
-		pingini(message);
+		ping(message);
 		return;
 	} else {
 		message.channel.send("\:no_entry: You need to enter a valid command!");
@@ -387,18 +387,22 @@ function help(message) {
 	return message.channel.send(reply);
 }
 
-async function pingini(message) {
-	console.log('ping hh')
-	await ping.promise.probe('www.youtube.com')
-	.then(function (res) {
-		if (res.alive === false) return message.channel.send("\:no_entry: Request timeout.")
-		const reply = new Discord.MessageEmbed()
+async function ping(message) {
+	const reply = new Discord.MessageEmbed()
 		.setColor('#0099ff')
 		.setTitle('Pinging Youtube servers ..')
-		.setDescription(res.time + ' ms')
+		.setDescription('working ...')
 		.setTimestamp()
 		.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
-		return message.channel.send(reply);
+	let msg = await message.channel.send(reply);
+	tcpp.ping({ address: 'www.youtube.com', attempts: 3 }, (err, data) => {
+		if (err) return console.log(err)
+		if (isNaN(data.avg)) {
+			reply.setDescription('\:no_entry: Request timeout.');
+			return msg.edit(reply);
+		}
+		reply.setDescription(data.avg.toFixed(3)+' ms');
+		return msg.edit(reply);
 	});
 }
 

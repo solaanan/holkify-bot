@@ -9,7 +9,7 @@
     "ffmpeg": "0.0.4",
     "fluent-ffmpeg": "^2.1.2",
     "genius-lyrics": "^1.0.9",
-    "ping": "^0.2.2",
+    "tcp-ping": "^0.1.1",
     "youtube-search": "^1.1.4",
     "ytdl-core": "^2.0.1"
   },
