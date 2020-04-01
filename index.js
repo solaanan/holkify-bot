@@ -376,7 +376,7 @@ function help(message) {
 		{ name: '*skip', value: 'Skips to the next song in the queue' },
 		{ name: '*stop', value: 'Stop playing the music and automatically leaves your voice channel.' },
 		{ name: '*status', value: 'Gives the queue\'s status.' },
-		{ name: '*status', value: 'Gives the queue\'s status.' },
+		{ name: '*ping', value: 'Ping the youtube servers.' },
 		{ name: '*lyrics', value: 'Fetch for the lyrics of the current song on Genius, and shows them, spits if found nothing.' },
 		{ name: '*spit', value: 'Spits at you, use this for testing the bot response.' },
 		{ name: '*disconnect', value: 'Leaves your voice channel.' },
@@ -388,6 +388,7 @@ function help(message) {
 }
 
 function pingini(message) {
+	console.log('ping hh')
 	ping.promise.probe('www.youtube.com')
 	.then(function (res) {
 		if (res.alive === false) return message.channel.send("\:no_entry: Request timeout.")
