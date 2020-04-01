@@ -2,10 +2,19 @@ const Discord = require('discord.js');
 const prefix = "*";
 const token = process.env.token;
 const geniusToken = process.env.geniusToken;
+const ytAPIToken =  process.env.ytAPIToken;
 
 const ytdl = require('ytdl-core');
 const genius = require("genius-lyrics");
 const Genius = new genius.Client(geniusToken);
+const ytSearch = require('youtube-search');
+
+const opts = {
+	maxResults: 1,
+	key: ytAPIToken,
+	type: 'video',
+	videoCategoryId: '10'
+}
 
 const client = new Discord.Client();
 
@@ -67,12 +76,25 @@ client.on('message', async message => {
 
 const queue = new Map();
 
+function getPos(position) {
+	if (position % 10 === 1)
+		return position + 'st'
+	else if (position % 10 === 2)
+		return position + 'nd'
+	else if (position % 10 === 3)
+		return position + 'rd'
+	else
+		return position + 'th'
+}
+
 async function execute(message, serverQueue) {
 	const args = message.content.split(" ");
 
 	if (!args[1]) {
 		console.log("No argument provided.."); return ;
 	}
+
+	var videoURL = args[1];
 
 	const voiceChannel = message.member.voice.channel;
 	if (!voiceChannel)
@@ -87,19 +109,23 @@ async function execute(message, serverQueue) {
 	}
 
 	if (await ytdl.validateURL(args[1]) !== true)
-	return message.channel.send(
-		"\:no_entry: Unvalid youtube URL!"
-		);
+	{
+		let query = message.content.substr(6, message.content.length - 6);
+		let prom = await ytSearch(query, opts)
+		if (prom.results.length === 0) return message.channel.send(`\:no_entry: Couldn't find any Youtube music video called: **${query}**`)
+		videoURL = prom.results[0].link;
+	}
 
 	try {
-		ytdl.getURLVideoID(args[1])
+		ytdl.getURLVideoID(videoURL)
 	} catch (err) {
 		console.log(err)
 	}
 
-	const songInfo = await ytdl.getInfo(args[1]);
+	const songInfo = await ytdl.getInfo(videoURL);
 
 	const song = {
+		id: songInfo.video_id,
 		title: songInfo.title,
 		url: songInfo.video_url,
 	};
@@ -107,7 +133,16 @@ async function execute(message, serverQueue) {
 	if (!serverQueue) {
 	} else {
 		serverQueue.songs.push(song);
-		return message.channel.send(`${song.title} has been added to the queue!`);
+		const reply = new Discord.MessageEmbed()
+		.setColor('#0099ff')
+		.setTitle(song.title)
+		.setURL(song.url)
+		.setDescription('Song added to the queue!')
+		.setThumbnail('https://img.youtube.com/vi/'+song.id+'/0.jpg')
+		.addField('Position', getPos(serverQueue.songs.length))
+		.setTimestamp()
+		.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
+		return message.channel.send(reply);
 	}
 	// Creating the contract for our queue
 	const queueContract = {
@@ -195,7 +230,15 @@ function play(guild, song) {
 		play(guild, serverQueue.songs[0]);
 	}).on("error", error => console.error(error));
 	dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
-	serverQueue.textChannel.send(`\:arrow_forward: Start playing: **${song.title}**`);
+	const reply = new Discord.MessageEmbed()
+	.setColor('#0099ff')
+	.setTitle(song.title)
+	.setURL(song.url)
+	.setDescription('Now playing..')
+	.setThumbnail('https://img.youtube.com/vi/'+song.id+'/0.jpg')
+	.setTimestamp()
+	.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
+	return serverQueue.textChannel.send(reply);
 }
 
 function skip(message, serverQueue) {
@@ -211,11 +254,17 @@ function skip(message, serverQueue) {
 
 function status(message, serverQueue) {
 	if (serverQueue) {
-		message.channel.send(`\:arrow_forward: Now playing: **${serverQueue.songs[0].title}**`);
+		const reply = new Discord.MessageEmbed()
+		.setColor('#0099ff')
+		.setTitle('Queue status:')
+		.addField('Now playing:', serverQueue.songs[0].title)
 		if (serverQueue.songs[1])
-		message.channel.send(`Next: **${serverQueue.songs[1].title}**`);
+			reply.addField('Next:', serverQueue.songs[1].title)
 		if (serverQueue.songs[2])
-		message.channel.send(`Later: **${serverQueue.songs[2].title}**`);
+			reply.addField('Later:', serverQueue.songs[2].title)
+		reply.setTimestamp()
+		.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
+		return serverQueue.textChannel.send(reply);
 	} else {
 		message.channel.send(`\:no_entry: No song is playing !`);
 	}
@@ -265,21 +314,43 @@ function stop(message, serverQueue) {
 }
 
 function pause(message, serverQueue) {
+	if (!serverQueue) return message.channel.send('\:no_entry: No song is playing!')
+	let song = serverQueue.songs[0];
 	if (!message.member.voice.channel)
 		return message.channel.send(
 			"\:cry: You have to be in a voice channel to stop the music!"
 	);
 	serverQueue.connection.dispatcher.pause();
 	serverQueue.playing = false;
+	const reply = new Discord.MessageEmbed()
+	.setColor('#0099ff')
+	.setTitle(song.title)
+	.setURL(song.url)
+	.setDescription('Paused !')
+	.setThumbnail('https://img.youtube.com/vi/'+song.id+'/0.jpg')
+	.setTimestamp()
+	.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
+	return serverQueue.textChannel.send(reply);
 	return message.channel.send(" \:pause_button: Paused!");
 }
 
 function resume(message, serverQueue) {
+	if (!serverQueue) return message.channel.send('\:no_entry: No song is playing!')
+	let song = serverQueue.songs[0]
 	if (!message.member.voice.channel)
 		return message.channel.send(
 			"\:cry: You have to be in a voice channel to stop the music!"
 	);
 	serverQueue.connection.dispatcher.resume();
+	const reply = new Discord.MessageEmbed()
+	.setColor('#0099ff')
+	.setTitle(song.title)
+	.setURL(song.url)
+	.setDescription('Resuming ..')
+	.setThumbnail('https://img.youtube.com/vi/'+song.id+'/0.jpg')
+	.setTimestamp()
+	.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
+	return serverQueue.textChannel.send(reply);
 	return message.channel.send("\:arrow_forward: Resuming..");
 }
 
