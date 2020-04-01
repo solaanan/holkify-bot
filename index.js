@@ -387,9 +387,9 @@ function help(message) {
 	return message.channel.send(reply);
 }
 
-function pingini(message) {
+async function pingini(message) {
 	console.log('ping hh')
-	ping.promise.probe('www.youtube.com')
+	await ping.promise.probe('www.youtube.com')
 	.then(function (res) {
 		if (res.alive === false) return message.channel.send("\:no_entry: Request timeout.")
 		const reply = new Discord.MessageEmbed()
