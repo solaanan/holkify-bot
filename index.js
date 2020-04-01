@@ -63,11 +63,14 @@ client.on('message', async message => {
 	} else if (message.content.startsWith(`${prefix}lyrics`)) {
 		lyrics(message, serverQueue);
 		return;
-	} else if (message.content.startsWith(`${prefix}spit-hardly`)) {
+	} else if (message.content.startsWith(`${prefix}spit-harder`)) {
 		spit_hardly(message);
 		return;
 	} else if (message.content.startsWith(`${prefix}spit`)) {
 		spit(message);
+		return;
+	} else if (message.content.startsWith(`${prefix}help`)) {
+		help(message);
 		return;
 	} else {
 		message.channel.send("\:no_entry: You need to enter a valid command!");
@@ -352,6 +355,30 @@ function resume(message, serverQueue) {
 	.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
 	return serverQueue.textChannel.send(reply);
 	return message.channel.send("\:arrow_forward: Resuming..");
+}
+
+function help(message) {
+	const reply = new Discord.MessageEmbed()
+	.setColor('#0099ff')
+	.setTitle('Holkify commands')
+	.setDescription('Here what you can do with Holkify:')
+	.addFields(
+		{ name: '*join', value: 'Summon the bot to the voice channel you are connected to.' },
+		{ name: '*play <Youtube URL>', value: 'Plays the audio from the link provided or adds it to the queue.' },
+		{ name: '*play <Song name>', value: 'Search for the song in Youtube and plays the audio or adds it to the queue' },
+		{ name: '*pause', value: 'Pauses playing the song.' },
+		{ name: '*resume', value: 'Resume playing the song.' },
+		{ name: '*skip', value: 'Skips to the next song in the queue' },
+		{ name: '*stop', value: 'Stop playing the music and automatically leaves your voice channel.' },
+		{ name: '*status', value: 'Gives the queue\'s status.' },
+		{ name: '*lyrics', value: 'Fetch for the lyrics of the current song on Genius, and shows them, spits if found nothing.' },
+		{ name: '*spit', value: 'Spits at you, use this for testing the bot response.' },
+		{ name: '*disconnect', value: 'Leaves your voice channel.' },
+		{ name: '*help', value: 'Shows the Holkify commands.' }
+	)
+	.setTimestamp()
+	.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
+	return message.channel.send(reply);
 }
 
 client.login(token);
