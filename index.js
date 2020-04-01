@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const prefix = "*";
+// const { token, geniusToken, ytAPIToken } = require("./tokens.json");
 const token = process.env.token;
 const geniusToken = process.env.geniusToken;
 const ytAPIToken =  process.env.ytAPIToken;
@@ -8,6 +9,7 @@ const ytdl = require('ytdl-core');
 const genius = require("genius-lyrics");
 const Genius = new genius.Client(geniusToken);
 const ytSearch = require('youtube-search');
+const ping = require('ping');
 
 const opts = {
 	maxResults: 1,
@@ -71,6 +73,9 @@ client.on('message', async message => {
 		return;
 	} else if (message.content.startsWith(`${prefix}help`)) {
 		help(message);
+		return;
+	} else if (message.content.startsWith(`${prefix}ping`)) {
+		pingini(message);
 		return;
 	} else {
 		message.channel.send("\:no_entry: You need to enter a valid command!");
@@ -371,6 +376,7 @@ function help(message) {
 		{ name: '*skip', value: 'Skips to the next song in the queue' },
 		{ name: '*stop', value: 'Stop playing the music and automatically leaves your voice channel.' },
 		{ name: '*status', value: 'Gives the queue\'s status.' },
+		{ name: '*status', value: 'Gives the queue\'s status.' },
 		{ name: '*lyrics', value: 'Fetch for the lyrics of the current song on Genius, and shows them, spits if found nothing.' },
 		{ name: '*spit', value: 'Spits at you, use this for testing the bot response.' },
 		{ name: '*disconnect', value: 'Leaves your voice channel.' },
@@ -379,6 +385,20 @@ function help(message) {
 	.setTimestamp()
 	.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
 	return message.channel.send(reply);
+}
+
+function pingini(message) {
+	ping.promise.probe('www.youtube.com')
+	.then(function (res) {
+		if (res.alive === false) return message.channel.send("\:no_entry: Request timeout.")
+		const reply = new Discord.MessageEmbed()
+		.setColor('#0099ff')
+		.setTitle('Pinging Youtube servers ..')
+		.setDescription(res.time + ' ms')
+		.setTimestamp()
+		.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
+		return message.channel.send(reply);
+	});
 }
 
 client.login(token);
