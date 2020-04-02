@@ -10,6 +10,8 @@ const genius = require("genius-lyrics");
 const Genius = new genius.Client(geniusToken);
 const ytSearch = require('youtube-search');
 const tcpp = require('tcp-ping');
+const request = require('request');
+const HTMLParser = require('node-html-parser');
 
 const opts = {
 	maxResults: 1,
@@ -76,6 +78,9 @@ client.on('message', async message => {
 		return;
 	} else if (message.content.startsWith(`${prefix}ping`)) {
 		ping(message);
+		return;
+	} else if (message.content.startsWith(`${prefix}corona`)) {
+		corona(message);
 		return;
 	} else {
 		message.channel.send("\:no_entry: You need to enter a valid command!");
@@ -380,7 +385,8 @@ function help(message) {
 		{ name: '*lyrics', value: 'Fetch for the lyrics of the current song on Genius, and shows them, spits if found nothing.' },
 		{ name: '*spit', value: 'Spits at you, use this for testing the bot response.' },
 		{ name: '*disconnect', value: 'Leaves your voice channel.' },
-		{ name: '*help', value: 'Shows the Holkify commands.' }
+		{ name: '*help', value: 'Shows the Holkify commands.' },
+		{ name: '*corona', value: 'Shows the COVID-19 stats in Morocco.' }
 	)
 	.setTimestamp()
 	.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
@@ -403,6 +409,45 @@ async function ping(message) {
 		}
 		reply.setDescription(data.avg.toFixed(3)+' ms');
 		return msg.edit(reply);
+	});
+}
+
+async function corona(message) {
+	let flag = 0;
+	const reply = new Discord.MessageEmbed()
+		.setColor('#0099ff')
+		.setTitle('COVID-19 stats in Morocco')
+		.setDescription('working ...')
+		.setTimestamp()
+		.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
+	let msg = await message.channel.send(reply);
+	request('https://www.worldometers.info/coronavirus/', function(err, res, body) {
+		if (err) {
+			reply.setDescription('\:no_entry: Couldn\'t retrieve the data.');
+			return msg.edit(reply);
+		}
+		const root = HTMLParser.parse(body);
+		const table = root.querySelector("#main_table_countries_today tbody");
+		table.childNodes.forEach(e => {
+			e.childNodes.forEach(d => {
+				if (d.nodeType === 1 && d.text === 'Morocco') {
+					flag = 1;
+					const morocco = d.parentNode;
+					reply.setDescription('')
+					.addField('Total cases:', morocco.childNodes[3].text)
+					.addField('New cases:', morocco.childNodes[5].text)
+					.addField('Total deaths:', morocco.childNodes[7].text)
+					.addField('New deaths:', morocco.childNodes[9].text)
+					.addField('Total recovered:', morocco.childNodes[11].text)
+					msg.edit(reply);
+					return ;
+				}
+			})
+		})
+		if (flag === 0) {
+			reply.setDescription('\:no_entry: Couldn\'t retrieve the data.');
+			return msg.edit(reply);
+		}
 	});
 }
 
