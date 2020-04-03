@@ -12,24 +12,7 @@ const ytSearch = require('youtube-search');
 const tcpp = require('tcp-ping');
 const request = require('request');
 const HTMLParser = require('node-html-parser');
-let data = {
-	aInternal: 0,
-	aListener: async function(val) {},
-	set a(val) {
-		this.aInternal = val;
-		this.aListener(val);
-	},
-	get a() {
-		return this.aInternal;
-	},
-	registerListener: function(listener) {
-		this.aListener = listener;
-	},
-	removeListener: function() {
-		if (this.aListener)
-			this.aListener = () => {};
-	}
-}
+let data = 0
 
 const opts = {
 	maxResults: 1,
@@ -51,7 +34,6 @@ client.once('disconnect', () => {
 });
 
 client.on('message', async message => {
-	data.removeListener();
 	if (message.author.bot) return;
 	if (!message.content.startsWith(prefix)) return;
 	if (message.channel.id != "693551208387838012") return ;
@@ -261,7 +243,7 @@ function play(guild, song) {
 	}
 
 	const dispatcher = serverQueue.connection.play(ytdl(song.url, {quality: 'highest', liveBuffer: 100000}).on('progress', (a, b, c) => {
-		data.a = parseInt(b / c * 100)
+		data = parseInt(b / c * 100)
 	})).on("finish", () => {
 		serverQueue.songs.shift();
 		play(guild, serverQueue.songs[0]);
@@ -324,20 +306,15 @@ async function status(message, serverQueue) {
 		const reply = new Discord.MessageEmbed()
 		.setColor('#0099ff')
 		.setTitle('Queue status:')
-		.setDescription(putProgressBar(data.a))
-		reply.addField('Now playing:', `(${data.a}%) ${serverQueue.songs[0].title}`)
+		.setDescription(putProgressBar(data))
+		reply.addField('Now playing:', `(${data}%) ${serverQueue.songs[0].title}`)
 		if (serverQueue.songs[1])
 			reply.addField('Next:', serverQueue.songs[1].title)
 		if (serverQueue.songs[2])
 			reply.addField('Later:', serverQueue.songs[2].title)
 		reply.setTimestamp()
 		.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
-		let msg = await serverQueue.textChannel.send(reply);
-		data.registerListener(val => {
-			reply.setDescription(putProgressBar(val))
-			.fields[0].value = `(${val}%) ${serverQueue.songs[0].title}`;
-			await msg.edit(reply);
-		})
+		return serverQueue.textChannel.send(reply);
 	} else {
 		message.channel.send(`\:no_entry: No song is playing !`);
 	}
