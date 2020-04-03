@@ -14,7 +14,7 @@ const request = require('request');
 const HTMLParser = require('node-html-parser');
 let data = {
 	aInternal: 0,
-	aListener: function(val) {},
+	aListener: async function(val) {},
 	set a(val) {
 		this.aInternal = val;
 		this.aListener(val);
@@ -22,7 +22,7 @@ let data = {
 	get a() {
 		return this.aInternal;
 	},
-	registerListener: async function(listener) {
+	registerListener: function(listener) {
 		this.aListener = listener;
 	},
 	removeListener: function() {
