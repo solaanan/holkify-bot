@@ -336,7 +336,7 @@ async function status(message, serverQueue) {
 		data.registerListener(val => {
 			reply.setDescription(putProgressBar(val))
 			.fields[0].value = `(${val}%) ${serverQueue.songs[0].title}`;
-			msg.edit(reply);
+			await msg.edit(reply);
 		})
 	} else {
 		message.channel.send(`\:no_entry: No song is playing !`);
