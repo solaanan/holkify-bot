@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const prefix = "*";
-// const { token, geniusToken, ytAPIToken } = require("./tokens.json");
+// const { token, geniusToken, ytAPIToken } = require("./toks.json");
 const token = process.env.token;
 const geniusToken = process.env.geniusToken;
 const ytAPIToken =  process.env.ytAPIToken;
@@ -12,6 +12,24 @@ const ytSearch = require('youtube-search');
 const tcpp = require('tcp-ping');
 const request = require('request');
 const HTMLParser = require('node-html-parser');
+let data = {
+	aInternal: 0,
+	aListener: function(val) {},
+	set a(val) {
+		this.aInternal = val;
+		this.aListener(val);
+	},
+	get a() {
+		return this.aInternal;
+	},
+	registerListener: function(listener) {
+		this.aListener = listener;
+	},
+	removeListener: function() {
+		if (this.aListener)
+			this.aListener = () => {};
+	}
+}
 
 const opts = {
 	maxResults: 1,
@@ -33,6 +51,7 @@ client.once('disconnect', () => {
 });
 
 client.on('message', async message => {
+	data.removeListener();
 	if (message.author.bot) return;
 	if (!message.content.startsWith(prefix)) return;
 	if (message.channel.id != "693551208387838012") return ;
@@ -42,6 +61,9 @@ client.on('message', async message => {
 
 	if (message.content.startsWith(`${prefix}play`)) {
 		execute(message, serverQueue);
+		return;
+	} else if (message.content.startsWith(`${prefix}skipto`)) {
+		skipto(message, serverQueue);
 		return;
 	} else if (message.content.startsWith(`${prefix}skip`)) {
 		skip(message, serverQueue);
@@ -238,10 +260,12 @@ function play(guild, song) {
 	  return;
 	}
 
-	const dispatcher = serverQueue.connection.play(ytdl(song.url, {quality: 'highest', liveBuffer: 100000})).on("finish", () => {
+	const dispatcher = serverQueue.connection.play(ytdl(song.url, {quality: 'highest', liveBuffer: 100000}).on('progress', (a, b, c) => {
+		data.a = parseInt(b / c * 100)
+	})).on("finish", () => {
 		serverQueue.songs.shift();
 		play(guild, serverQueue.songs[0]);
-	}).on("error", error => console.error(error));
+	}).on("error", error => console.error(error))
 	dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
 	const reply = new Discord.MessageEmbed()
 	.setColor('#0099ff')
@@ -259,25 +283,61 @@ function skip(message, serverQueue) {
 		return message.channel.send(
 			"\:cry: You have to be in a voice channel to stop the music!"
 	);
-	if (!serverQueue)
+	if (!serverQueue || !serverQueue.songs[1])
 		return message.channel.send("\:no_entry: There is no song that I could skip!");
 	serverQueue.connection.dispatcher.end();
 	return message.channel.send("\:fast_forward: Skipping to next song..");
 }
 
-function status(message, serverQueue) {
+function skipto(message, serverQueue) {
+	if (!message.member.voice.channel)
+		return message.channel.send("\:cry: You have to be in a voice channel to stop the music!");
+	const args = message.content.split(' ');
+	if (!args[1])
+	return message.channel.send("\:no_entry: Missing argument! (ex: *skipto 2)");
+	if (args[2])
+	return message.channel.send("\:no_entry: too much arguments! (ex: *skipto 2)");
+	let pos = parseInt(args[1]) - 2;
+	if (pos < 0) return ;
+	if (!serverQueue || !serverQueue.songs[pos + 1])
+		return message.channel.send("\:no_entry: There is no song that I could skip!");
+	while (pos--)
+		serverQueue.songs.shift();
+	serverQueue.connection.dispatcher.end();
+	return message.channel.send(`\:fast_forward: Skipping to the ${getPos(parseInt(args[1]))} song in the queue ..`);
+}
+
+function putProgressBar(data) {
+	str = '[';
+	for(let i = 0; i < parseInt(data / 100 * 20); i++) {
+		str += '\u{2588}';
+	}
+	for(let i = 0; i < parseInt(20 - (data / 100 * 20)); i++) {
+		str += '\u{2591}';
+	}
+	str += ']';
+	return (str);
+}
+
+async function status(message, serverQueue) {
 	if (serverQueue) {
 		const reply = new Discord.MessageEmbed()
 		.setColor('#0099ff')
 		.setTitle('Queue status:')
-		.addField('Now playing:', serverQueue.songs[0].title)
+		.setDescription(putProgressBar(data.a))
+		reply.addField('Now playing:', `(${data.a}%) ${serverQueue.songs[0].title}`)
 		if (serverQueue.songs[1])
 			reply.addField('Next:', serverQueue.songs[1].title)
 		if (serverQueue.songs[2])
 			reply.addField('Later:', serverQueue.songs[2].title)
 		reply.setTimestamp()
 		.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
-		return serverQueue.textChannel.send(reply);
+		let msg = await serverQueue.textChannel.send(reply);
+		data.registerListener(val => {
+			reply.setDescription(putProgressBar(val))
+			.fields[0].value = `(${val}%) ${serverQueue.songs[0].title}`;
+			msg.edit(reply);
+		})
 	} else {
 		message.channel.send(`\:no_entry: No song is playing !`);
 	}
