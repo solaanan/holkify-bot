@@ -22,7 +22,7 @@ let data = {
 	get a() {
 		return this.aInternal;
 	},
-	registerListener: function(listener) {
+	registerListener: async function(listener) {
 		this.aListener = listener;
 	},
 	removeListener: function() {
