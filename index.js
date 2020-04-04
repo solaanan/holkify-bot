@@ -3,7 +3,7 @@ const prefix = "*";
 // const { token, geniusToken, ytAPIToken } = require("./toks.json");
 const token = process.env.token;
 const geniusToken = process.env.geniusToken;
-const ytAPIToken =  process.env.ytAPIToken;
+const ytAPIToken = process.env.ytAPIToken;
 
 const ytdl = require('ytdl-core');
 const genius = require("genius-lyrics");
@@ -85,6 +85,9 @@ client.on('message', async message => {
 		return;
 	} else if (message.content.startsWith(`${prefix}corona`)) {
 		corona(message);
+		return;
+	} else if (message.content.startsWith(`${prefix}mute`)) {
+		mute(message);
 		return;
 	} else {
 		message.channel.send("\:no_entry: You need to enter a valid command!");
@@ -422,8 +425,9 @@ function help(message) {
 		{ name: '*lyrics', value: 'Fetch for the lyrics of the current song on Genius, and shows them, spits if found nothing.' },
 		{ name: '*spit', value: 'Spits at you, use this for testing the bot response.' },
 		{ name: '*disconnect', value: 'Leaves your voice channel.' },
-		{ name: '*help', value: 'Shows the Holkify commands.' },
-		{ name: '*corona', value: 'Shows the COVID-19 stats in Morocco.' }
+		{ name: '*corona', value: 'Shows the COVID-19 stats in Morocco.' },
+		{ name: '*mute', value: 'Mute or unmute' },
+		{ name: '*help', value: 'Shows the Holkify commands.' }
 	)
 	.setTimestamp()
 	.setFooter('Holkify', 'https://i.imgur.com/XDkcxLZ.png');
@@ -486,6 +490,15 @@ async function corona(message) {
 			return msg.edit(reply);
 		}
 	});
+}
+
+function mute(message) {
+	const voiceChannel = message.member.voice.channel;
+	if (!voiceChannel)
+		return message.channel.send("\:no_entry: You need to be in a voice channel!");
+	if (client.voice.connections.array()[0])
+		client.voice.connections.array()[0].voice.setMute(!client.voice.connections.array()[0].voice.mute)
+	message.channel.send(`Done ! \:smile:`)
 }
 
 client.login(token);
