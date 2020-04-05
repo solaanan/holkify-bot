@@ -90,7 +90,7 @@ client.on('message', async message => {
 		mute(message);
 		return;
 	} else if (message.content.startsWith("!prayer")) {
-		message.channel.send("sir a <@695037342972510226> sir \:joy: \:joy: \:joy:");
+		message.channel.send("sir a @695037342972510226 sir \:joy: \:joy: \:joy:");
 		return;
 	} else {
 		message.channel.send("\:no_entry: You need to enter a valid command!");
