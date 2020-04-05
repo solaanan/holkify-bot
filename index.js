@@ -89,7 +89,7 @@ client.on('message', async message => {
 	} else if (message.content.startsWith(`${prefix}mute`)) {
 		mute(message);
 		return;
-	} else if (message.content.startsWith(`!prayer`)) {
+	} else if (message.content.startsWith("!prayer")) {
 		message.channel.send("sir a <@695037342972510226> sir \:joy: \:joy: \:joy:");
 		return;
 	} else {
@@ -483,7 +483,7 @@ async function corona(message) {
 					.addField('Total deaths:', morocco.childNodes[7].text)
 					.addField('New deaths:', morocco.childNodes[9].text)
 					.addField('Total recovered:', morocco.childNodes[11].text)
-					.addField('Total cases excluded after negative laboratory analysis:', morocco.childNodes[21].text - morocco.childNodes[3].text)
+					.addField('Total cases excluded after negative laboratory analysis:', toString(parseInt(morocco.childNodes[21].text) - parseInt(morocco.childNodes[3].text)))
 					msg.edit(reply);
 					return ;
 				}
