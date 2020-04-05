@@ -35,7 +35,7 @@ client.once('disconnect', () => {
 
 client.on('message', async message => {
 	if (message.author.bot) return;
-	if (!message.content.startsWith(prefix)) return;
+	if (!message.content.startsWith(prefix) && !message.content.startsWith("!prayer")) return;
 	if (message.channel.id != "693551208387838012") return ;
 
 	const serverQueue = queue.get(message.guild.id);
@@ -477,13 +477,14 @@ async function corona(message) {
 				if (d.nodeType === 1 && d.text === 'Morocco') {
 					flag = 1;
 					const morocco = d.parentNode;
+					let n = parseInt(morocco.childNodes[21].text) - parseInt(morocco.childNodes[3].text);
 					reply.setDescription('')
 					.addField('Total cases:', morocco.childNodes[3].text)
 					.addField('New cases:', morocco.childNodes[5].text)
 					.addField('Total deaths:', morocco.childNodes[7].text)
 					.addField('New deaths:', morocco.childNodes[9].text)
 					.addField('Total recovered:', morocco.childNodes[11].text)
-					.addField('Total cases excluded after negative laboratory analysis:', toString(parseInt(morocco.childNodes[21].text) - parseInt(morocco.childNodes[3].text)))
+					.addField('Total cases excluded after negative laboratory analysis:', n.toString());
 					msg.edit(reply);
 					return ;
 				}
