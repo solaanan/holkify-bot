@@ -480,9 +480,9 @@ async function corona(message) {
 					let n = parseInt(morocco.childNodes[21].text.replace(',', '')) - parseInt(morocco.childNodes[3].text.replace(',', ''));
 					reply.setDescription('')
 					.addField('Total cases:', morocco.childNodes[3].text.replace(',', ''))
-					.addField('New cases:', morocco.childNodes[5].text)
+					.addField('New cases:', morocco.childNodes[5].text === '' ? '0' : morocco.childNodes[5].text)
 					.addField('Total deaths:', morocco.childNodes[7].text)
-					.addField('New deaths:', morocco.childNodes[9].text)
+					.addField('New deaths:', morocco.childNodes[9].text === '' ? '0' : morocco.childNodes[9].text)
 					.addField('Total recovered:', morocco.childNodes[11].text)
 					.addField('Tested negative:', n.toString());
 					msg.edit(reply);
