@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
 const prefix = "*";
-// const { token, geniusToken, ytAPIToken } = require("./toks.json");
-const token = process.env.token;
-const geniusToken = process.env.geniusToken;
-const ytAPIToken = process.env.ytAPIToken;
+const { token, geniusToken, ytAPIToken } = require("./toks.json");
+// const token = process.env.token;
+// const geniusToken = process.env.geniusToken;
+// const ytAPIToken = process.env.ytAPIToken;
 
 const ytdl = require('ytdl-core');
 const genius = require("genius-lyrics");
@@ -477,13 +477,14 @@ async function corona(message) {
 				if (d.nodeType === 1 && d.text === 'Morocco') {
 					flag = 1;
 					const morocco = d.parentNode;
-					let n = parseInt(morocco.childNodes[21].text.replace(',', '')) - parseInt(morocco.childNodes[3].text.replace(',', ''));
+					let n = parseInt(morocco.childNodes[23].text.replace(',', '')) - parseInt(morocco.childNodes[5].text.replace(',', ''));
+					
 					reply.setDescription('')
-					.addField('Total cases:', morocco.childNodes[3].text.replace(',', ''))
-					.addField('New cases:', morocco.childNodes[5].text === '' ? '0' : morocco.childNodes[5].text)
-					.addField('Total deaths:', morocco.childNodes[7].text)
-					.addField('New deaths:', morocco.childNodes[9].text === '' ? '0' : morocco.childNodes[9].text)
-					.addField('Total recovered:', morocco.childNodes[11].text)
+					.addField('Total cases:', morocco.childNodes[5].text.replace(',', ''))
+					.addField('New cases:', morocco.childNodes[7].text === '' ? '0' : morocco.childNodes[7].text)
+					.addField('Total deaths:', morocco.childNodes[9].text)
+					.addField('New deaths:', morocco.childNodes[11].text === '' ? '0' : morocco.childNodes[11].text)
+					.addField('Total recovered:', morocco.childNodes[13].text)
 					.addField('Tested negative:', n.toString());
 					msg.edit(reply);
 					return ;
