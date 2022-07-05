@@ -4,7 +4,7 @@
   "description": "A simple discord bot that plays music from Youtube.",
   "main": "index.js",
   "dependencies": {
-    "@discordjs/opus": "^0.1.0",
+    "@discordjs/opus": "^0.8.0",
     "discord.js": "^12.1.1",
     "ffmpeg": "0.0.4",
     "fluent-ffmpeg": "^2.1.2",
